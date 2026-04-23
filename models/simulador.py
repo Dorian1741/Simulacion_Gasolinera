@@ -8,7 +8,7 @@ from config.settings import (
 )
 
 class Simulador:
-    """Controla la lógica estocástica del flujo vehicular."""
+    #Controla la estocastica del flujo vehicular.
     
     def __init__(self, env: simpy.Environment, gasolinera: Gasolinera, tiempo_entre_llegadas=1.5):
         self.env = env
@@ -20,15 +20,15 @@ class Simulador:
         self.tiempo_ocupado_total =0 #contador para el tiempo que se ocupan los surtidores
 
     def flujo_vehiculo(self, nombre: str):
-        """Ciclo de vida de un vehículo (Entidad) dentro del sistema (Nodos)."""
+        #tiempo que un vehículo esta dentro del sistema.
         hora_llegada = self.env.now
 
-       # Si la fila es de 5 autos o más, el cliente decide irse.
-        if len(self.gasolinera.surtidores.queue) >= 10:
+       # Si la fila es de n autos o mas el cliente abandona la gasolinera.
+        if len(self.gasolinera.surtidores.queue) >= 5:
             self.vehiculos_perdidos += 1
-            return  # Sale de la simulación sin entrar a la gasolinera
+            return 
 
-        # 1. Hacer fila para un surtidor (Recurso 1)
+        # 1. Hacer fila para un surtidor
         with self.gasolinera.surtidores.request() as req_surtidor:
             yield req_surtidor
             hora_accede_surtidor = self.env.now
@@ -50,7 +50,7 @@ class Simulador:
         hora_salida = self.env.now
         Tiempo_Servicio = hora_salida - hora_inicio_servicio
         self.tiempo_ocupado_total += Tiempo_Servicio
-        # 5. Registro de Métricas (Data Logging)
+        # 5. registo de datos que se obtienen
         self.datos_vehiculos.append({
             'ID_Vehiculo': nombre,
             'Hora_Llegada': round(hora_llegada, 2),
@@ -63,21 +63,21 @@ class Simulador:
         self.vehiculos_atendidos += 1
 
     def generar_llegadas(self):
-        """Generador de procesos dinámico (Uniforme o Exponencial)."""
+        #Generador de procesos dinamico
         i = 1
         while True:
-            # Comprobamos si nos enviaron un rango (tupla o lista) desde app.py
+            # que salio desde app.py
             if isinstance(self.tiempo_entre_llegadas, (tuple, list)):
                 tiempo_minimo = self.tiempo_entre_llegadas[0]
                 tiempo_maximo = self.tiempo_entre_llegadas[1]
                 # Usamos Distribución Uniforme para el rango
                 tiempo_llegada_aleatorio = np.random.uniform(low=tiempo_minimo, high=tiempo_maximo)
             else:
-                # Si es un solo número (Configuración Base), usamos Distribución Exponencial
+                # Distribución Exponencial
                 tiempo_llegada_aleatorio = np.random.exponential(scale=self.tiempo_entre_llegadas)
             
             yield self.env.timeout(tiempo_llegada_aleatorio)
             
-            # Crea un nuevo vehículo y lo inyecta en el sistema
+            # Crea un nuevo vehículo y lo mete en el sistema
             self.env.process(self.flujo_vehiculo(f'Veh_{i}'))
             i += 1

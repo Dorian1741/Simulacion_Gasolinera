@@ -7,17 +7,16 @@ import numpy as np
 import os
 from datetime import datetime
 
-# Importamos tu configuración y modelos
-# verifica el settings en fa
+# Importamos la configuracion y modelos
+# verificador de configuracion
 from config.settings import RANDOM_SEED, TIEMPO_SIMULACION, TIEMPO_ENTRE_LLEGADAS
 from models.gasolinera import Gasolinera
 from models.simulador import Simulador
 
 st.set_page_config(page_title="Simulación Gasolinera", page_icon="⛽", layout="wide")
 
-# ==========================================
 # CONFIGURACIÓN DE AFLUENCIA POR DÍA
-# ==========================================
+
 AFLUENCIA_POR_DIA = {
     "carnaval (tiempo de fiestas)": TIEMPO_ENTRE_LLEGADAS,
     "Lunes a Jueves (Normal)": (1,3),
@@ -26,9 +25,8 @@ AFLUENCIA_POR_DIA = {
     "Domingo (Bajo)": (3,5)
 }
 
-# ==========================================
-# BARRA LATERAL (SIDEBAR) INTERACTIVA
-# ==========================================
+# BARRA LATERAL INTERACTIVA
+
 st.sidebar.image("https://cdn-icons-png.flaticon.com/512/4433/4433058.png", width=100)
 st.sidebar.title("⚙️ Parámetros")
 st.sidebar.markdown("Modifica los valores y vuelve a ejecutar para ver distintos escenarios.")
@@ -39,7 +37,7 @@ dia_seleccionado = st.sidebar.selectbox(
     options=list(AFLUENCIA_POR_DIA.keys())
 )
 
-# ---Extraemos el tiempo del día seleccionado ---
+# seleccion de dias
 tiempo_llegada_dia = AFLUENCIA_POR_DIA[dia_seleccionado]
 st.sidebar.write(f"⏱️ **Frecuencia:** 1 auto cada {tiempo_llegada_dia} min aprox.")
 st.sidebar.divider()
@@ -50,11 +48,11 @@ nueva_semilla = st.sidebar.number_input("Semilla Aleatoria (Seed)", value=RANDOM
 nuevo_tiempo = st.sidebar.slider("Tiempo de Simulación (min)", min_value=60, max_value=720, value=TIEMPO_SIMULACION, step=60)
 
 st.sidebar.divider()
-st.sidebar.info("💡 Cambia la 'Semilla Aleatoria' a cualquier otro número (ej. 15, 99, 1024) para generar un día de operaciones completamente diferente.")
+st.sidebar.info("💡 Cambia la 'Semilla' a cualquier otro número (ej. 15, 99, 1024) para generar un día de operaciones completamente diferente.")
 
-# ==========================================
+
 # PANEL PRINCIPAL
-# ==========================================
+
 st.title("⛽ Simulador Interactivo de Gasolinera")
 st.markdown("Esta interfaz permite visualizar los resultados del modelo de colas estocástico.")
 
@@ -69,7 +67,7 @@ if st.button("▶️ Ejecutar Simulación", type="primary"):
         env = simpy.Environment()
         estacion = Gasolinera(env)
         
-        # tiempo de llegada dinámico al simulador ---
+        # tiempo de llegada dinámico al simulador
         simulador = Simulador(env, estacion, tiempo_entre_llegadas=tiempo_llegada_dia)
         
         env.process(simulador.generar_llegadas())
@@ -91,16 +89,16 @@ if st.button("▶️ Ejecutar Simulación", type="primary"):
     st.subheader("📈 Indicadores Clave de Rendimiento (KPIs)")
     
     # 1. Cálculo de Utilización (Nivel de uso de los surtidores)
-    # Fórmula: (Suma de tiempos de servicio) / (Cantidad de surtidores * Tiempo total simulado)
+    # Fórmula: Suma de tiempos de servicio / (Cantidad de surtidores * Tiempo total simulado)
     num_surtidores = 4  
     utilizacion = (simulador.tiempo_ocupado_total / (num_surtidores * nuevo_tiempo)) * 100
     
-    # 2. 5 columnas para que quepan todos los indicadores
+    # 2. 5 columnas para todos los datos
     col1, col2, col3, col4, col5 = st.columns(5)
     
     col1.metric(label="Total Vehículos", value=len(df))
     col2.metric(label="Espera Promedio", value=f"{df['Tiempo_Espera_Fila'].mean():.2f} min")
-    col3.metric(label="Utilización", value=f"{utilizacion:.1f}%") # <--- Aquí está el % de uso
+    col3.metric(label="Utilización", value=f"{utilizacion:.1f}%")
     col4.metric(label="Clientes Perdidos", value=simulador.vehiculos_perdidos)
     col5.metric(label="Espera Máxima", value=f"{df['Tiempo_Espera_Fila'].max():.2f} min")
 
@@ -124,7 +122,7 @@ if st.button("▶️ Ejecutar Simulación", type="primary"):
 
     st.divider()
     
-    # Mostrar tabla completa y botón de descarga ---
+    # Mostrar y descargar los datos ---
     st.subheader("📋 Registro de Eventos Completo")
     
     # Botón para descargar el CSV directamente desde el navegador

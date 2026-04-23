@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def generar_dashboard(df: pd.DataFrame):
-    """Genera una visualización de las métricas clave obtenidas."""
+    #Genera una visualización de las métricas obtenidas
     # Verificar si el DataFrame está vacío para evitar errores
     if df.empty:
         print("⚠️ No hay datos para mostrar en el Dashboard.")
@@ -13,22 +13,22 @@ def generar_dashboard(df: pd.DataFrame):
     fig = plt.figure(figsize=(15, 9))
     fig.suptitle('Dashboard Analítico - Operaciones en Gasolinera', fontsize=16, fontweight='bold')
 
-    # 1. Histograma de Espera
+    # 1. Historial de Espera
     ax1 = plt.subplot(2, 2, 1)
     sns.histplot(df['Tiempo_Espera_Fila'], bins=30, kde=True, color='crimson', ax=ax1)
     ax1.set_title('Distribución de Tiempos de Espera en Fila')
     ax1.set_xlabel('Minutos')
     ax1.set_ylabel('Frecuencia')
 
-    # 2. Evolución Temporal (Cambiamos el rolling a 5 o 10 por si hay pocos datos)
+    # 2. Evolucion en el tiempou
     ax2 = plt.subplot(2, 2, 2)
     sns.scatterplot(x='Hora_Llegada', y='Tiempo_Espera_Fila', data=df, alpha=0.5, color='darkblue', ax=ax2)
     
-    # Solo hacer la línea de tendencia si hay suficientes datos
-    if len(df) > 100:
+    # hacer la linea de tendencia si hay suficientes datos
+    if len(df) > 5:
         sns.lineplot(
             x=df['Hora_Llegada'], 
-            y=df['Tiempo_Espera_Fila'].rolling(100).mean(), 
+            y=df['Tiempo_Espera_Fila'].rolling(5).mean(), 
             color='orange', 
             label='Tendencia', 
             ax=ax2

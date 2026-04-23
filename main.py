@@ -7,8 +7,8 @@ from models.simulador import Simulador
 from visualization.dashboard import generar_dashboard
 
 def main():
-    print("🚀 Inicializando entorno de simulación modular...")
-    np.random.seed(RANDOM_SEED)  # Semilla para resultados consistentes
+    print("Inicializando entorno de simulación modular...")
+    np.random.seed(RANDOM_SEED) #usar semillas de generacion de pseudoaleatorios como en minecraft
     
     # Iniciar Entorno y Clases
     env = simpy.Environment()
